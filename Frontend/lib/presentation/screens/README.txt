@@ -1,0 +1,1 @@
+Các màn hình/trang lớn

@@ -1,0 +1,1 @@
+Nơi chứa các cấu hình hệ thống cho UI

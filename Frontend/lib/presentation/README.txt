@@ -1,0 +1,1 @@
+Nơi chứa toàn bộ cốt lõi giao diện màn hình
