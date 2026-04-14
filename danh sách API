@@ -1,0 +1,72 @@
+PHẦN 1. BẢN MÔ TẢ DANH SÁCH CÁC API/FUNCTION CHÍNH
+1. Nhóm Quản lý Công việc (Task / To-Do)
+Nhóm hàm này quản lý các thao tác cốt lõi liên quan đến Todo trong ứng dụng.
+
+getAllTasks & watchAllTasks:
+Mục đích: getAllTasks dùng để lấy dữ liệu tĩnh 1 lần, watchAllTasks mở một luồng (Stream) liên tục lắng nghe thay đổi của danh sách việc để tự động render lại UI.
+Giao diện sử dụng: todo_screen.dart, calendar_screen.dart.
+addTask:
+Mục đích: Thêm mới một công việc vào hệ cơ sở dữ liệu.
+Giao diện sử dụng: add_task_sheet.dart.
+updateTask:
+Mục đích: Cập nhật thông tin công việc (Ví dụ: Thay tên, đổi trạng thái sang "Đã hoàn thành" (isCompleted), đổi mốc thời gian nhắc nhở).
+Giao diện sử dụng: todo_screen.dart (chẳng hạn khi bấm tick checkbox hoàn thành), add_task_sheet.dart (khi cần edit).
+deleteTask:
+Mục đích: Xóa vĩnh viễn hoặc đưa một công việc vào thùng rác.
+Giao diện sử dụng: task_item.dart (Khi người dùng vuốt thẻ để xóa - Slide to delete).
+2. Nhóm Quản lý Ghi chú (Note)
+Nhóm hàm phục vụ chức năng lưu văn bản với định dạng nâng cao (Rich-text).
+
+getAllNotes & watchAllNotes:
+Mục đích: Chịu trách nhiệm lấy và lắng nghe sự thay đổi của danh sách ghi chú.
+Giao diện sử dụng: note_screen.dart.
+addNote / updateNote:
+Mục đích: Khởi tạo hoặc lưu lại các chỉnh sửa trên nội dung file ghi chú (nội dung lưu dưới dạng dữ liệu JSON của framework Flutter Quill).
+Giao diện sử dụng: Giao diện soạn thảo edit_note_screen.dart.
+deleteNote:
+Mục đích: Xóa bỏ một thẻ ghi chú cá nhân.
+Giao diện sử dụng: note_screen.dart / note_card.dart / edit_note_screen.dart.
+3. Nhóm Phân loại & Danh mục (Category)
+getAllCategories và addCategory:
+Mục đích: Lấy ra danh sách các Tag/Danh mục (Nhà, Công nghệ, Việc học...) để gán cho các Task.
+Giao diện sử dụng: Component bộ lọc hoặc khi tạo mới ở add_task_sheet.dart.
+PHẦN 2. THIẾT KẾ CHI TIẾT TỪNG FUNCTION
+Do đặc thù là dùng Internal DB (Native SQL thông qua Drift package), URL sẽ tương đương với Tên Hàm (Function/Method).
+
+1. Lọc và Hiển thị Tasks
+Lệnh/Tên Hàm: watchAllTasks()
+Input Parameters: Trống (Hoặc trong tương lai có thêm Filter objects: categoryId, date_range, isCompleted).
+Output: Stream<List<Task>> (Luồng dữ liệu realtime gồm danh sách các Object Task).
+Database Table: Mệnh đề SELECT * FROM Tasks có thể đi kèm ORDER BY createdAt DESC.
+2. Thêm mới công việc
+Lệnh/Tên Hàm: addTask()
+Input Parameters:
+Object TasksCompanion bảo gồm:
+title (String, max: 255): Tiêu đề
+description (String, nullable): Ghi chú bổ sung
+categoryId (Int, nullable): Phân loại
+priority (Int, default: 1): Mức ưu tiên
+  reminderAt (DateTime, nullable): Hẹn giờ thông báo báo thức
+isCompleted (Bool, default: false)
+Output: Future<int> (Trả về ID nguyên dương vừa được sinh tự động của Task này để xác nhận đã INSERT thành công).
+Database Table: Thao tác INSERT vào bảng Tasks.
+3. Cập nhật trạng thái / Thông tin Công việc
+Lệnh/Tên Hàm: updateTask()
+Input Parameters: Object Task gốc (chứa id của bản ghi cần cập nhật và các props đã được sửa đổi, đặc biệt là isCompleted = true/false).
+Output: Future<bool> (Trả về true nếu cập nhật thành công, false nếu thất bại/bản ghi ko tồn tại).
+Database Table: UPDATE Tasks SET... WHERE id = {taskId}.
+4. Thêm / Chỉnh sửa văn bản Ghi chú
+Lệnh/Tên Hàm: addNote() / updateNote()
+Input Parameters:
+Object NotesCompanion hoặc Note bao gồm:
+title (String, max 255): Tên tài liệu
+content (String): Nội dung mã hóa dạng đặc thù (nguồn JSON xuất ra từ trình soạn thảo Quill).
+color (Int, Hex code): Màu thẻ Note (Dùng để tô màu cái Thẻ NoteCard).
+isPinned (Bool): Đánh dấu có Pin (ghim lên trên cùng) hay không.
+Output: Future<int> (ID bản ghi) hoặc Future<bool> (báo hiệu thành công).
+Database Table: Thao tác INSERT/UPDATE tại bảng Notes. Ngày updatedAt tự động cập nhật timestamp hiện tại.
+5. Xóa (Task / Note)
+Lệnh/Tên Hàm: deleteTask() / deleteNote()
+Input Parameters: id (int) - ID của bản ghi muốn xóa.
+Output: Future<int> số lượng row đã bị drop thành công (thường return 1).
+Database Table: DELETE FROM Tasks/Notes WHERE id = {input_id}.
