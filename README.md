@@ -1,3 +1,5 @@
+Created By Nguyễn Tiến Đạt
+
 # Todo & Note Manager App
 
 Một ứng dụng di động quản lý công việc và ghi chú cá nhân mạnh mẽ được xây dựng bằng **Flutter**, áp dụng các tiêu chuẩn **Clean Architecture** để đảm bảo khả năng mở rộng và dễ dàng bảo trì.
